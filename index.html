@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character Chat Prototype</title>
+  <style>
+    :root {
+      --bg: #0f1221;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.12);
+      --text: #eef2ff;
+      --muted: #a9b2d0;
+      --accent: #8b5cf6;
+      --accent-2: #22c55e;
+      --border: rgba(255, 255, 255, 0.14);
+      --user: #1d4ed8;
+      --assistant: rgba(255,255,255,0.08);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.28), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.18), transparent 28%),
+        linear-gradient(135deg, #0b1020, #11162a 45%, #0c1222);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(1200px, 100%);
+      min-height: 720px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+      gap: 18px;
+    }
+
+    .badge {
+      align-self: flex-start;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ddd6fe;
+      background: rgba(139, 92, 246, 0.18);
+      border: 1px solid rgba(139, 92, 246, 0.28);
+      border-radius: 999px;
+      padding: 7px 12px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(160deg, rgba(139,92,246,0.24), rgba(255,255,255,0.04));
+      border: 1px solid var(--border);
+      aspect-ratio: 3 / 4;
+      display: grid;
+      place-items: center;
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar-placeholder {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .char-name {
+      font-size: 30px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .char-role {
+      font-size: 14px;
+      color: #c4b5fd;
+      margin-top: 4px;
+    }
+
+    .char-desc {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .meta {
+      display: grid;
+      gap: 10px;
+    }
+
+    .meta-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .chat-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 720px;
+    }
+
+    .chat-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .chat-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .chat-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #d1fae5;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.22);
+      padding: 8px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+    }
+
+    .messages {
+      padding: 24px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: min(78%, 720px);
+      padding: 14px 16px;
+      border-radius: 20px;
+      line-height: 1.75;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      white-space: pre-wrap;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--assistant);
+      border-top-left-radius: 8px;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: rgba(29, 78, 216, 0.22);
+      border: 1px solid rgba(96, 165, 250, 0.24);
+      border-top-right-radius: 8px;
+    }
+
+    .message small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .composer {
+      padding: 18px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      gap: 12px;
+      background: rgba(9, 14, 27, 0.5);
+    }
+
+    .composer-top {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .composer-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 68px;
+      max-height: 180px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 16px 18px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: #9aa3c3;
+    }
+
+    button {
+      border: none;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font: inherit;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      cursor: pointer;
+      min-width: 132px;
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.28);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    code.inline {
+      background: rgba(255,255,255,0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #ddd6fe;
+    }
+
+    @media (max-width: 960px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-panel {
+        min-height: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="panel sidebar">
+      <div class="badge">Character Mode</div>
+
+      <div class="avatar-wrap">
+        <!-- 画像を使う場合は src を差し替えてください -->
+        <!-- 例: <img src="character.png" alt="キャラクター画像" /> -->
+        <div class="avatar-placeholder">
+          <strong>キャラクター画像エリア</strong><br />
+          ここに立ち絵や顔アイコンを配置できます。
+        </div>
+      </div>
+
+      <div>
+        <h1 class="char-name">エレナ</h1>
+        <div class="char-role">Insight Navigator / UX Strategy Agent</div>
+      </div>
+
+      <div class="char-desc">
+        静かに問いを深め、曖昧な要望から本質を引き出すキャラクター。
+        相談相手、壁打ち相手、軽いメンターとして振る舞う想定です。
+      </div>
+
+      <div class="meta">
+        <div class="meta-item">
+          <span class="meta-label">話し方</span>
+          <div class="meta-value">丁寧・知的・少しやわらかい</div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">役割</span>
+          <div class="meta-value">ヒアリング、構造化、仮説整理、次の一歩の提案</div>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">差し替えポイント</span>
+          <div class="meta-value">画像、名前、肩書き、色、口調、初回メッセージ</div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="panel chat-panel">
+      <header class="chat-header">
+        <div>
+          <h2 class="chat-title">エレナと話す</h2>
+          <div class="chat-subtitle">単一HTMLの試作UI / 現在はデモ応答です</div>
+        </div>
+        <div class="status">Prototype Ready</div>
+      </header>
+
+      <div class="messages" id="messages">
+        <div class="message assistant">
+          <small>Elena</small>
+          こんにちは。今日はどんなテーマを一緒に整理しましょうか？
+          まだ曖昧でも大丈夫です。断片からでも、形にしていけます。
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-top">
+          <span class="chip">HTMLのみで動作</span>
+          <span class="chip">次段階でAPI接続可能</span>
+          <span class="chip">キャラ演出差し替え可</span>
+        </div>
+
+        <div class="composer-row">
+          <textarea id="input" placeholder="たとえば：このサービスの課題を一緒に整理して"></textarea>
+          <button id="sendBtn">送信</button>
+        </div>
+
+        <div class="helper">
+          今は<strong>デモ応答</strong>です。<br />
+          本番化する場合は <code class="inline">fakeReply()</code> を API 呼び出しへ差し替えます。
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function addMessage(role, text, label) {
+      const el = document.createElement('div');
+      el.className = `message ${role}`;
+      el.innerHTML = `<small>${label}</small>${escapeHtml(text).replace(/\n/g, '<br>')}`;
+      messages.appendChild(el);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function fakeReply(userText) {
+      const templates = [
+        `いい視点ですね。\n\n「${userText}」については、まず\n1. 何を達成したいのか\n2. 誰にとっての価値か\n3. 今どこが曖昧なのか\nの3つに分けると整理しやすいです。`,
+        `了解です。\n\nいまの話を仮説として置くと、論点は「目的」「体験」「実装」の3層に分かれそうです。まずは目的から一緒に言語化しましょう。`,
+        `面白いテーマです。\n\n最初の一歩としては、結論を急がずに「前提」「ズレ」「次の問い」を切り分けるのがよさそうです。必要ならこの場でそのまま構造化します。`
+      ];
+
+      return templates[Math.floor(Math.random() * templates.length)];
+    }
+
+    function handleSend() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage('user', text, 'You');
+      input.value = '';
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = '応答中...';
+
+      setTimeout(() => {
+        const reply = fakeReply(text);
+        addMessage('assistant', reply, 'Elena');
+        sendBtn.disabled = false;
+        sendBtn.textContent = '送信';
+      }, 500);
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    // =============================
+    // API接続のイメージ（参考）
+    // =============================
+    // 注意:
+    // - フロントにAPIキーを直接書くのはNGです。
+    // - 実運用はサーバー経由にしてください。
+    //
+    // async function callYourServer(userText, history) {
+    //   const res = await fetch('/api/chat', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //       character: {
+    //         name: 'エレナ',
+    //         systemPrompt: 'あなたは静かに問いを深めるUX戦略キャラクターです...'
+    //       },
+    //       message: userText,
+    //       history
+    //     })
+    //   });
+    //
+    //   const data = await res.json();
+    //   return data.reply;
+    // }
+  </script>
+</body>
+</html>
