@@ -208,6 +208,7 @@
 
     .message.assistant {
       align-self: flex-start;
+      background: var(--assistant);
       border-top-left-radius: 8px;
     }
 
@@ -226,28 +227,6 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
-    
-    .message-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-    
-    .bubble {
-      background: var(--assistant);
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      max-width: 100%;
-    }
 
     .composer {
       padding: 18px;
@@ -256,7 +235,6 @@
       gap: 12px;
       background: rgba(9, 14, 27, 0.5);
     }
-    
 
     .composer-top {
       display: flex;
@@ -344,11 +322,9 @@
   <main class="app">
     <aside class="panel sidebar">
       <div class="badge">Character Mode</div>
-
       <div class="avatar-wrap">
-        <img src="assets/elena_ig.png" alt="エレナ" />
+        <img src="assets/elena_ig.png" alt="エレナ IG版" />
       </div>
-
       <div>
         <h1 class="char-name">エレナ</h1>
         <div class="char-role">Insight Navigator / UX Strategy Agent</div>
@@ -420,26 +396,7 @@
     function addMessage(role, text, label) {
       const el = document.createElement('div');
       el.className = `message ${role}`;
-    
-      if (role === 'assistant') {
-        el.innerHTML = `
-          <div class="message-row">
-            <img src="assets/elena_ig.png" class="avatar" />
-            <div class="bubble">
-              <small>${label}</small>
-              ${escapeHtml(text).replace(/\n/g, '<br>')}
-            </div>
-          </div>
-        `;
-      } else {
-        el.innerHTML = `
-          <div class="bubble">
-            <small>${label}</small>
-            ${escapeHtml(text).replace(/\n/g, '<br>')}
-          </div>
-        `;
-      }
-    
+      el.innerHTML = `<small>${label}</small>${escapeHtml(text).replace(/\n/g, '<br>')}`;
       messages.appendChild(el);
       messages.scrollTop = messages.scrollHeight;
     }
