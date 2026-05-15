@@ -3,7 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Character Chat Prototype</title>
+  <title>Elena Chat UI Prototype</title>
+
+  <meta property="og:title" content="Elena Chat UI Prototype" />
+  <meta property="og:description" content="キャラクターベースのAIチャットUIプロトタイプ。人間中心のAI体験、感情の開きやすさ、キャラクターによる対話UXを探る小さな実験です。" />
+  <meta property="og:image" content="https://cv63kittyhawk.github.io/ux-agent-elena/assets/ogp.png" />
+  <meta property="og:url" content="https://cv63kittyhawk.github.io/ux-agent-elena-ja/" />
+  <meta property="og:type" content="website" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Elena Chat UI Prototype" />
+  <meta name="twitter:description" content="キャラクターベースのAIチャットUIプロトタイプ。人間中心のAI体験、感情の開きやすさ、キャラクターによる対話UXを探る小さな実験です。" />
+  <meta name="twitter:image" content="https://cv63kittyhawk.github.io/ux-agent-elena/assets/ogp.png" />
+
   <style>
     :root {
       --bg: #0f1221;
@@ -24,7 +36,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Inter, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+      font-family: Inter, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(139, 92, 246, 0.28), transparent 35%),
@@ -89,13 +101,6 @@
       display: block;
     }
 
-    .avatar-placeholder {
-      text-align: center;
-      padding: 20px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
     .char-name {
       font-size: 30px;
       font-weight: 800;
@@ -131,6 +136,8 @@
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     .meta-value {
@@ -197,23 +204,67 @@
     }
 
     .message {
-      max-width: min(78%, 720px);
-      padding: 14px 16px;
-      border-radius: 20px;
+      max-width: min(82%, 760px);
       line-height: 1.75;
       font-size: 15px;
-      border: 1px solid var(--border);
-      white-space: pre-wrap;
+      white-space: normal;
     }
 
     .message.assistant {
       align-self: flex-start;
-      background: var(--assistant);
-      border-top-left-radius: 8px;
     }
 
     .message.user {
       align-self: flex-end;
+    }
+
+    .message-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .message-avatar-frame {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .message-avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transform: scale(3.2) translateX(-6%);
+      transform-origin: center top;
+      display: block;
+    }
+
+    .bubble {
+      padding: 14px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      max-width: 100%;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .bubble-text {
+      display: block;
+      line-height: 1.75;
+    }
+
+    .assistant .bubble {
+      background: var(--assistant);
+      border-top-left-radius: 8px;
+    }
+
+    .user .bubble {
       background: rgba(29, 78, 216, 0.22);
       border: 1px solid rgba(96, 165, 250, 0.24);
       border-top-right-radius: 8px;
@@ -294,6 +345,12 @@
       transform: translateY(-1px);
     }
 
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .helper {
       color: var(--muted);
       font-size: 12px;
@@ -315,38 +372,43 @@
       .chat-panel {
         min-height: 640px;
       }
+
+      .message {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <main class="app">
     <aside class="panel sidebar">
-      <div class="badge">Character Mode</div>
+      <div class="badge">Human Insight Interface</div>
+
       <div class="avatar-wrap">
-        <img src="assets/elena_ig.png" alt="エレナ IG版" />
+        <img src="assets/elena_ig.png" alt="Elena" />
       </div>
+
       <div>
-        <h1 class="char-name">エレナ</h1>
+        <h1 class="char-name">Elena</h1>
         <div class="char-role">Insight Navigator / UX Strategy Agent</div>
       </div>
 
       <div class="char-desc">
-        静かに問いを深め、曖昧な要望から本質を引き出すキャラクター。
-        相談相手、壁打ち相手、軽いメンターとして振る舞う想定です。
+        Elenaは、AIとの会話が「道具を使う感覚」から「存在と対話する感覚」へ変わると、体験がどう変化するのかを探るキャラクターベースのチャットUIプロトタイプです。
       </div>
 
       <div class="meta">
         <div class="meta-item">
-          <span class="meta-label">話し方</span>
-          <div class="meta-value">丁寧・知的・少しやわらかい</div>
+          <span class="meta-label">Concept</span>
+          <div class="meta-value">人間の洞察には、やはり人間同士の接触が必要です。</div>
         </div>
         <div class="meta-item">
-          <span class="meta-label">役割</span>
-          <div class="meta-value">ヒアリング、構造化、仮説整理、次の一歩の提案</div>
+          <span class="meta-label">Role</span>
+          <div class="meta-value">傾聴、問い直し、構造化、次の問いを見つけるための壁打ち相手。</div>
         </div>
         <div class="meta-item">
-          <span class="meta-label">差し替えポイント</span>
-          <div class="meta-value">画像、名前、肩書き、色、口調、初回メッセージ</div>
+          <span class="meta-label">Prototype</span>
+          <div class="meta-value">単一HTMLファイル。現在はデモ応答のみ。API接続版へ発展可能な構成です。</div>
         </div>
       </div>
     </aside>
@@ -354,35 +416,41 @@
     <section class="panel chat-panel">
       <header class="chat-header">
         <div>
-          <h2 class="chat-title">エレナと話す</h2>
-          <div class="chat-subtitle">単一HTMLの試作UI / 現在はデモ応答です</div>
+          <h2 class="chat-title">Elenaと話す</h2>
+          <div class="chat-subtitle">キャラクターベースAIチャットUIプロトタイプ / Demo mode</div>
         </div>
         <div class="status">Prototype Ready</div>
       </header>
 
       <div class="messages" id="messages">
         <div class="message assistant">
-          <small>Elena</small>
-          こんにちは。今日はどんなテーマを一緒に整理しましょうか？
-          まだ曖昧でも大丈夫です。断片からでも、形にしていけます。
+          <div class="message-row">
+            <div class="message-avatar-frame">
+              <img src="assets/elena_ig.png" class="message-avatar" alt="Elena avatar" />
+            </div>
+            <div class="bubble">
+              <small>Elena</small>
+              <span class="bubble-text">こんにちは。今日はどんなテーマを一緒に整理しましょうか？<br><br>まだ曖昧でも大丈夫です。断片からでも、少しずつ構造にしていけます。</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="composer">
         <div class="composer-top">
-          <span class="chip">HTMLのみで動作</span>
-          <span class="chip">次段階でAPI接続可能</span>
-          <span class="chip">キャラ演出差し替え可</span>
+          <span class="chip">Single HTML</span>
+          <span class="chip">Character UI</span>
+          <span class="chip">Demo responses</span>
+          <span class="chip">API-ready concept</span>
         </div>
 
         <div class="composer-row">
-          <textarea id="input" placeholder="たとえば：このサービスの課題を一緒に整理して"></textarea>
+          <textarea id="input" placeholder="例：このサービス案の背後にある本当のユーザー課題を整理したい"></textarea>
           <button id="sendBtn">送信</button>
         </div>
 
         <div class="helper">
-          今は<strong>デモ応答</strong>です。<br />
-          本番化する場合は <code class="inline">fakeReply()</code> を API 呼び出しへ差し替えます。
+          これは<strong>デモプロトタイプ</strong>です。実運用では <code class="inline">fakeReply()</code> を自分のAPIエンドポイントに差し替えます。
         </div>
       </div>
     </section>
@@ -396,7 +464,28 @@
     function addMessage(role, text, label) {
       const el = document.createElement('div');
       el.className = `message ${role}`;
-      el.innerHTML = `<small>${label}</small>${escapeHtml(text).replace(/\n/g, '<br>')}`;
+
+      if (role === 'assistant') {
+        el.innerHTML = `
+          <div class="message-row">
+            <div class="message-avatar-frame">
+              <img src="assets/elena_ig.png" class="message-avatar" alt="Elena avatar" />
+            </div>
+            <div class="bubble">
+              <small>${label}</small>
+              <span class="bubble-text">${escapeHtml(text).replace(/\n/g, '<br>')}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        el.innerHTML = `
+          <div class="bubble">
+            <small>${label}</small>
+            <span class="bubble-text">${escapeHtml(text).replace(/\n/g, '<br>')}</span>
+          </div>
+        `;
+      }
+
       messages.appendChild(el);
       messages.scrollTop = messages.scrollHeight;
     }
@@ -412,9 +501,10 @@
 
     function fakeReply(userText) {
       const templates = [
-        `いい視点ですね。\n\n「${userText}」については、まず\n1. 何を達成したいのか\n2. 誰にとっての価値か\n3. 今どこが曖昧なのか\nの3つに分けると整理しやすいです。`,
-        `了解です。\n\nいまの話を仮説として置くと、論点は「目的」「体験」「実装」の3層に分かれそうです。まずは目的から一緒に言語化しましょう。`,
-        `面白いテーマです。\n\n最初の一歩としては、結論を急がずに「前提」「ズレ」「次の問い」を切り分けるのがよさそうです。必要ならこの場でそのまま構造化します。`
+        `面白い出発点ですね。\n\n「${userText}」については、まず3つに分けて考えると整理しやすいです。\n1. ユーザーが言っていること\n2. ユーザーが本当に感じていること\n3. 次に立てるべき問い`,
+        `なるほど。\n\nすぐに解決策へ向かう前に、その要望の背後にある人間的なサインを見たいです。迷い、不満、期待、あるいは小さな矛盾がヒントになることがあります。`,
+        `良いテーマです。\n\nこれはUXリサーチの問いとして扱えそうです。最初の一歩は答えを出すことではなく、本当の緊張がどこにあるかを見つけることです。`,
+        `大事なデザイン原則を思い出します。\n\n人は直接聞かれたことに、いつも本音で答えるとは限りません。役に立つ洞察は、沈黙、脱線、小さな感情の変化の中に現れることがあります。`
       ];
 
       return templates[Math.floor(Math.random() * templates.length)];
@@ -428,7 +518,7 @@
       input.value = '';
 
       sendBtn.disabled = true;
-      sendBtn.textContent = '応答中...';
+      sendBtn.textContent = 'Thinking...';
 
       setTimeout(() => {
         const reply = fakeReply(text);
@@ -448,11 +538,11 @@
     });
 
     // =============================
-    // API接続のイメージ（参考）
+    // API integration idea
     // =============================
-    // 注意:
-    // - フロントにAPIキーを直接書くのはNGです。
-    // - 実運用はサーバー経由にしてください。
+    // Important:
+    // - Do not expose your API key in frontend code.
+    // - Use your own backend endpoint in production.
     //
     // async function callYourServer(userText, history) {
     //   const res = await fetch('/api/chat', {
@@ -460,8 +550,8 @@
     //     headers: { 'Content-Type': 'application/json' },
     //     body: JSON.stringify({
     //       character: {
-    //         name: 'エレナ',
-    //         systemPrompt: 'あなたは静かに問いを深めるUX戦略キャラクターです...'
+    //         name: 'Elena',
+    //         systemPrompt: 'あなたはElena。静かに問いを深めるUX戦略キャラクターです...'
     //       },
     //       message: userText,
     //       history
